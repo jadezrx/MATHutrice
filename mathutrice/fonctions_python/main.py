@@ -33,6 +33,10 @@ from mathutrice.fonctions_python.type_questions.steps_generator import (
 )
 from mathutrice.fonctions_python.base_generator import choisir_competence, update_scores
 from mathutrice.referentiel import REFERENTIEL
+from mathutrice.lacune_evaluation.LLM_as_Evaluator import (
+    diagnostiquer_depuis_competence,
+    afficher_resultat,
+)
 
 # ─── NOTIONS DISPONIBLES ──────────────────────────────────────────────────────
 
@@ -322,12 +326,6 @@ def run_test(questions: list[dict]) -> None:
 
     scores_initiaux = {}
     total = len(questions)
-    # Import local : LLM_as_Evaluator importe REFERENTIEL depuis ce module (cycle).
-    from mathutrice.lacune_evaluation.LLM_as_Evaluator import (
-        diagnostiquer_depuis_competence,
-        afficher_resultat,
-    )
-
     for i, question in enumerate(questions, start=1):
         q_type = question.get("type")
 
