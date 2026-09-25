@@ -3,7 +3,6 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from sqlmodel import Session, SQLModel, select
 
 from mathutrice import models
-from mathutrice.database import engine
 from mathutrice.referentiel import REFERENTIEL
 
 # Descriptions des notions, indexées par clé du REFERENTIEL.
@@ -59,6 +58,8 @@ def seed_referentiel(session: Session, referentiel: dict = REFERENTIEL) -> None:
 
 
 if __name__ == "__main__":
+    from mathutrice.database import engine
+
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         seed_referentiel(session)
