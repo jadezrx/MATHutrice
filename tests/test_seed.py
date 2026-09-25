@@ -6,7 +6,7 @@ for _k in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from mathutrice import models
-from mathutrice.fonctions_python.main import REFERENTIEL
+from mathutrice.referentiel import REFERENTIEL
 from mathutrice.fonctions_python.seed import seed_referentiel
 
 

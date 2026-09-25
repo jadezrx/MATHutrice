@@ -140,10 +140,8 @@ from mathutrice.fonctions_python.chatbot import (  # noqa: E402
     chat_stream_with_history,
     reset_conversation,
 )
-from mathutrice.fonctions_python.main import (  # noqa: E402
-    REFERENTIEL,
-    generate_mixed_test,
-)
+from mathutrice.referentiel import REFERENTIEL  # noqa: E402
+from mathutrice.fonctions_python.main import generate_mixed_test  # noqa: E402
 from mathutrice.fonctions_python.session_generator import (  # noqa: E402
     build_notion_data_with_scores,
     generate_next_question,

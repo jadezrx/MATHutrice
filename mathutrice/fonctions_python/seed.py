@@ -3,7 +3,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from sqlmodel import Session, SQLModel, select
 
 from mathutrice import models
-from mathutrice.fonctions_python.main import REFERENTIEL
+from mathutrice.referentiel import REFERENTIEL
 
 # Descriptions des notions, indexées par clé du REFERENTIEL.
 DESCRIPTIONS = {
