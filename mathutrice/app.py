@@ -32,6 +32,9 @@ import hmac
 import random
 import traceback
 from datetime import datetime, timedelta
+from mathutrice.lacune_evaluation.LLM_as_Evaluator import (
+    _build_flat_competences,
+)  # violation
 
 
 load_dotenv()
@@ -165,11 +168,11 @@ from mathutrice.lacune_evaluation.LLM_as_Evaluator import (  # noqa: E402
 )
 
 app.add_middleware(
-        SessionMiddleware,
-        secret_key=SESSION_SECRET,
-        https_only=AUTH_MODE != "dev",
-        same_site="lax",
-        max_age=3600,
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    https_only=AUTH_MODE != "dev",
+    same_site="lax",
+    max_age=3600,
 )
 
 
@@ -267,9 +270,7 @@ def sign_in(
 ) -> str:
     now = datetime.utcnow()
 
-    user = session.exec(
-        select(models.User).where(models.User.email == email)
-    ).first()
+    user = session.exec(select(models.User).where(models.User.email == email)).first()
 
     if user:
         user.last_active = now
@@ -316,7 +317,7 @@ async def login(request: Request):
 
     msal_app = get_msal_app()
 
-    #state en prod à activer dans /auth en prod
+    # state en prod à activer dans /auth en prod
     state = str(uuid.uuid4())
     request.session["oauth_state"] = state
 
@@ -445,7 +446,7 @@ async def auth_callback(
         )
 
     # Vérification OAuth state désactivée temporairement en préprod
-# À réactiver plus tard avec un state signé ou une session stable.
+    # À réactiver plus tard avec un state signé ou une session stable.
     # saved_state = request.session.get("oauth_state")
 
     # print("STATE URL =", state)
@@ -749,6 +750,7 @@ async def home_page(
 # MODULE PAGE
 # ------------------------------------------------------------------
 
+
 @app.get("/module", response_class=HTMLResponse)
 async def module_page(
     request: Request,
@@ -790,6 +792,7 @@ async def module_page(
             "notion_key": notion.referentiel_key,
         },
     )
+
 
 # ------------------------------------------------------------------
 # CHAT PAGE
@@ -1018,7 +1021,7 @@ async def chat_stream_endpoint(
         return JSONResponse(status_code=401, content={"detail": "Non connecté"})
 
     sso_id = session.exec(
-    select(models.User.sso_id).where(models.User.email == user["email"])
+        select(models.User.sso_id).where(models.User.email == user["email"])
     ).first()
 
     if not sso_id:
@@ -1196,18 +1199,11 @@ async def reset_session_endpoint(
                 content={"ok": False, "error": "Notion inconnue en BDD"},
             )
 
-        codes = [
-            comp["code"]
-            for comp in REFERENTIEL[data.notion_key]["competences"]
-        ]
+        codes = [comp["code"] for comp in REFERENTIEL[data.notion_key]["competences"]]
 
         code_to_competence = get_competence_map_by_codes(codes, session)
 
-        missing_codes = [
-            code
-            for code in codes
-            if code not in code_to_competence
-        ]
+        missing_codes = [code for code in codes if code not in code_to_competence]
 
         if missing_codes:
             return JSONResponse(
@@ -1220,8 +1216,7 @@ async def reset_session_endpoint(
             )
 
         competence_ids = [
-            competence.competence_id
-            for competence in code_to_competence.values()
+            competence.competence_id for competence in code_to_competence.values()
         ]
 
         rows = session.exec(
@@ -1322,9 +1317,7 @@ async def check_session(
         )
 
     notion = session.exec(
-        select(models.Notion).where(
-            models.Notion.referentiel_key == notion_key
-        )
+        select(models.Notion).where(models.Notion.referentiel_key == notion_key)
     ).first()
 
     if not notion:
@@ -1573,9 +1566,7 @@ async def save_session_history_endpoint(
         )
 
     notion = session.exec(
-        select(models.Notion).where(
-            models.Notion.referentiel_key == data.notion_key
-        )
+        select(models.Notion).where(models.Notion.referentiel_key == data.notion_key)
     ).first()
 
     if not notion:
@@ -1667,9 +1658,7 @@ async def get_session_history_endpoint(
         )
 
     notion = session.exec(
-        select(models.Notion).where(
-            models.Notion.referentiel_key == notion_key
-        )
+        select(models.Notion).where(models.Notion.referentiel_key == notion_key)
     ).first()
 
     if not notion:
@@ -1785,9 +1774,7 @@ async def feedback_endpoint(
             + " niveau "
             + data.competence.get("niveau", "")
             + "\n\n"
-            "Consigne : "
-            + instruction
-            + "\n"
+            "Consigne : " + instruction + "\n"
             "Ne donne JAMAIS la bonne reponse. Utilise le tu. Sois concis. Pas de JSON ni balises.\n"
         )
 
@@ -1805,9 +1792,7 @@ async def feedback_endpoint(
                 REFERENTIEL = get_referentiel()
 
                 sso_id = session.exec(
-                    select(models.User.sso_id).where(
-                        models.User.email == user["email"]
-                    )
+                    select(models.User.sso_id).where(models.User.email == user["email"])
                 ).first()
 
                 if not sso_id:
@@ -2074,9 +2059,7 @@ async def mark_training_started(
         )
 
     notion = session.exec(
-        select(models.Notion).where(
-            models.Notion.referentiel_key == data.notion_key
-        )
+        select(models.Notion).where(models.Notion.referentiel_key == data.notion_key)
     ).first()
 
     if not notion:
@@ -2249,9 +2232,7 @@ async def get_recommendations_endpoint(
         )
 
     source_notion = session.exec(
-        select(models.Notion).where(
-            models.Notion.referentiel_key == notion_key
-        )
+        select(models.Notion).where(models.Notion.referentiel_key == notion_key)
     ).first()
 
     if not source_notion:
