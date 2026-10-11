@@ -13,7 +13,7 @@ import pytest
 from mathutrice.llm_client import DeadlineClient, DeadlineReached
 
 # Written out, not imported: a deadline other than 5 minutes must fail here.
-FIVE_MINUTES = 5 * 60
+FIVE_MINUTES = 4 * 60
 
 # Measured on 25 September 2026: one call to the LLM endpoint takes about 2.3 s.
 SECONDS_PER_ANSWER = 2.3
@@ -68,7 +68,9 @@ def slow_llm_endpoint(clock: FakeClock, seconds_per_answer: float, calls_started
 def test_an_evaluation_test_on_a_slow_llm_endpoint_ends_with_the_deadline_within_5_minutes():
     clock = FakeClock()
     calls_started = []
-    llm = DeadlineClient(slow_llm_endpoint(clock, SECONDS_PER_ANSWER, calls_started), clock)
+    llm = DeadlineClient(
+        slow_llm_endpoint(clock, SECONDS_PER_ANSWER, calls_started), clock
+    )
 
     # 200 questions × 2.3 s = 460 s: far more work than 5 minutes allow.
     with pytest.raises(DeadlineReached):
