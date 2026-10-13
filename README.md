@@ -58,7 +58,7 @@ Every variable the application reads is listed, with comments, in
 
 | Variable | Meaning |
 | --- | --- |
-| `DATABASE_URL` | SQLAlchemy URL. SQLite by default; PostgreSQL where it is deployed. |
+| `DATABASE_URL` | SQLAlchemy URL. SQLite by default, and on this fork's deployment (see below). |
 | `LLM_BASE_URL` | The OpenAI-compatible **LLM endpoint** every LLM call goes through. **Required.** |
 | `LLM_MODEL` | The model served by that endpoint. **Required.** |
 | `LLM_API_KEY` | The key for that endpoint. **Required.** |
@@ -101,6 +101,10 @@ for any user and any role, and never sees the sign-in page at all. Leaving the
 placeholder from `.env.example` in place on a reachable host makes
 `DEV_LOGIN_KEY` decorative.
 
+This fork's two deployed environments are the exception: they hold generated
+data and no real users, and run `AUTH_MODE=dev`, each with its own
+`DEV_LOGIN_KEY` and `SESSION_SECRET` (see "How this fork is deployed").
+
 Signing in from a script means keeping the session cookie between requests:
 
 ```sh
@@ -115,6 +119,38 @@ The first call answers `303` with a `Set-Cookie: session=…`. `role` is
 `student`, `teacher` or `admin`; `name` is optional and defaults to the existing
 user's name, or one derived from the address. Add `-d 'key=…'` when
 `DEV_LOGIN_KEY` is set.
+
+## How this fork is deployed
+
+The fork runs on Azure App Service, as two apps on one Linux B1 plan in the
+`jadezrx-forks` resource group: `jadezrx-mathutrice-staging` (Fork staging)
+and `jadezrx-mathutrice-production` (Fork production).
+
+**Deploy on green.** A push to `course-2026-fallback-clean-bench` runs the
+`architecture` and `test` jobs of `.github/workflows/architecture.yml`. Only
+when both pass does the `deploy to staging` job run, on that same commit:
+
+1. It builds one image from the [`Dockerfile`](Dockerfile), tagged with the
+   commit, and pushes it to `ghcr.io/jadezrx/mathutrice`. A commit already
+   built is not built again.
+2. It signs in to Azure through OpenID Connect, as the `staging` GitHub
+   Environment: no Azure password is stored anywhere.
+3. It writes staging's settings on the app: the three secrets of the GitHub
+   Environment (`DEV_LOGIN_KEY`, `SESSION_SECRET`, `LLM_API_KEY`), and the
+   rest, the same in every environment, written in the workflow.
+4. It sets the app to that image, and waits until the app answers with the
+   commit in its `X-Revision` header. A container that does not start fails
+   the job.
+
+A pull request, or a push to any other branch, runs the checks and deploys
+nothing.
+
+**The image** installs the versions in `uv.lock` and starts one process, the
+same `uvicorn mathutrice.app:app` as above, with one worker: its startup
+creates and seeds the database and starts the hourly cleanup of old
+conversations. The SQLite database lives on the container's own disk, so it is
+created and seeded again at every start, and what users wrote is lost at each
+deploy or restart.
 
 ## Layout
 
