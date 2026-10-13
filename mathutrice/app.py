@@ -104,6 +104,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Le commit dont l'image est construite (REVISION, donné au build). Renvoyé dans
+# l'en-tête X-Revision de chaque réponse : le déploiement sait ainsi quelle
+# image lui répond, pas seulement qu'une image répond.
+REVISION = os.getenv("REVISION") or "unknown"
+
+
+@app.middleware("http")
+async def send_revision(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Revision"] = REVISION
+    return response
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

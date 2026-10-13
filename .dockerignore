@@ -1,0 +1,9 @@
+# Only what the image needs is sent to the build: never .env, a local database,
+# a virtual environment or uploaded PDFs.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!mathutrice/
+mathutrice/rag_documents/
+**/__pycache__/
